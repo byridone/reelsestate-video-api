@@ -38,8 +38,7 @@ interface RealEstateVideoProps {
     location?: string;
     price?: string;
     musicUrl?: string;
-    dayOfMonth?: number; // 1-31, stil için
-    // Stil override'ları
+    dayOfMonth?: number;
     primaryColor?: string;
     secondaryColor?: string;
     transitionType?: 'fade' | 'zoom' | 'slide' | 'glitch' | 'ken-burns';
@@ -65,10 +64,13 @@ const PhotoSlide: React.FC<{
         { extrapolateRight: 'clamp' }
     );
 
-    // Fade in/out
+    // Fade in/out - GÜVENLİ inputRange hesaplaması
+    const fadeIn = Math.min(10, Math.floor(durationInFrames * 0.15));
+    const fadeOut = Math.max(fadeIn + 1, durationInFrames - fadeIn);
+    
     const opacity = interpolate(
         relativeFrame,
-        [0, 10, durationInFrames - 10, durationInFrames],
+        [0, fadeIn, fadeOut, durationInFrames],
         [0, 1, 1, 0],
         { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
     );
@@ -118,9 +120,9 @@ export const RealEstateVideo: React.FC<RealEstateVideoProps> = ({
     const frame = useCurrentFrame();
     const { fps, durationInFrames } = useVideoConfig();
 
-    // Her foto için süre
+    // Her foto için süre - minimum 30 frame
     const photoDuration = photos.length > 0
-        ? Math.floor(durationInFrames / photos.length)
+        ? Math.max(30, Math.floor(durationInFrames / photos.length))
         : durationInFrames;
 
     // Text animasyonları
@@ -302,4 +304,3 @@ export const RealEstateVideo: React.FC<RealEstateVideoProps> = ({
         </AbsoluteFill>
     );
 };
-
